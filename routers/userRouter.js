@@ -10,6 +10,6 @@ const { verifyToken, adminOnly } = require("../Middleware/verifyToken");
 
 router.post("/register", registerUser);
 router.post("/create-admin", verifyToken, adminOnly, createAdmin);
-router.get("/login", getUser);
+router.post("/login", getUser);
 
 module.exports = router;

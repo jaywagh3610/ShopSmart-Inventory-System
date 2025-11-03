@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Manage Products</title>
+    <style>
+      body {
+        font-family: Arial;
+        background: #f7f7f7;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background: #333;
+        color: white;
+      }
+      input,
+      select,
+      button {
+        padding: 5px;
+        margin: 5px;
+      }
+      #formContainer {
+        margin-bottom: 20px;
+        background: #fff;
+        padding: 10px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📦 Manage Products</h1>
+    <a href="/admin-panel">⬅ Back to Dashboard</a>
+
+    <div id="formContainer">
+      <h3>Add / Update Product</h3>
+      <input id="name" placeholder="Name" />
+      <input id="modelName" placeholder="Model Name" />
+      <input id="company" placeholder="Company" />
+      <input id="category" placeholder="Category" />
+      <input id="quantity" type="number" placeholder="Quantity" />
+      <input id="price" type="number" placeholder="Price" />
+      <button onclick="createProduct()">Save Product</button>
+    </div>
+
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Model</th>
+          <th>Company</th>
+          <th>Category</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      const token = localStorage.getItem("token");
+      if (!token) window.location.href = "/login";
+
+      async function fetchProducts() {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        const tbody = document.querySelector("#productTable tbody");
+        tbody.innerHTML = "";
+
+        data.data.forEach((p) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${p.name}</td>
+            <td>${p.modelName}</td>
+            <td>${p.company}</td>
+            <td>${p.category}</td>
+            <td><input type="number" id="qty-${p._id}" value="${p.quantity}" min="0" /></td>
+            <td><input type="number" id="price-${p._id}" value="${p.price}" min="0" /></td>
+            <td>
+              <button onclick="updateProduct('${p._id}')">💾 Update</button>
+              <button onclick="deleteProduct('${p._id}')">🗑 Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function createProduct() {
+        const product = {
+          name: name.value,
+          modelName: modelName.value,
+          company: company.value,
+          category: category.value,
+          quantity: Number(quantity.value),
+          price: Number(price.value),
+        };
+
+        const res = await fetch("/api/products/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(product),
+        });
+
+        const data = await res.json();
+        if (!res.ok) return alert(data.message);
+        alert("✅ Product saved!");
+        fetchProducts();
+      }
+
+      async function updateProduct(id) {
+        const newQty = Number(document.getElementById(`qty-${id}`).value);
+        const newPrice = Number(document.getElementById(`price-${id}`).value);
+
+        if (isNaN(newQty) || newQty < 0 || isNaN(newPrice) || newPrice < 0) {
+          return alert("❌ Invalid input values.");
+        }
+
+        const res = await fetch(`/api/products/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ quantity: newQty, price: newPrice }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) return alert(data.message);
+        alert("✅ Product updated successfully!");
+        fetchProducts();
+      }
+
+      async function deleteProduct(id) {
+        if (!confirm("Delete this product?")) return;
+        const res = await fetch(`/api/products/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.message);
+        alert("🗑 Deleted!");
+        fetchProducts();
+      }
+
+      fetchProducts();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Manage Orders</title>
+    <style>
+      body {
+        font-family: Arial;
+        background: #f7f7f7;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background: #333;
+        color: white;
+      }
+      select,
+      button {
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧾 Manage Orders</h1>
+    <a href="/admin-panel">⬅ Back to Dashboard</a>
+
+    <table id="orderTable">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>User</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Address</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      const token = localStorage.getItem("token");
+      if (!token) window.location.href = "/login";
+
+      async function fetchOrders() {
+        const res = await fetch("/api/order", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const tbody = document.querySelector("#orderTable tbody");
+        tbody.innerHTML = "";
+
+        data.data.forEach((o) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+          <td>${o._id}</td>
+          <td>${o.user?.name || "N/A"}</td>
+          <td>₹${o.totalAmount}</td>
+          <td>
+            <select onchange="updateStatus('${o._id}', this.value)">
+              <option ${
+                o.status === "Pending" ? "selected" : ""
+              }>Pending</option>
+              <option ${
+                o.status === "Shipped" ? "selected" : ""
+              }>Shipped</option>
+              <option ${
+                o.status === "Delivered" ? "selected" : ""
+              }>Delivered</option>
+              <option ${
+                o.status === "Cancelled" ? "selected" : ""
+              }>Cancelled</option>
+            </select>
+          </td>
+          <td>${o.paymentStatus || "Unpaid"}</td>
+          <td>${o.address}</td>
+          <td><button onclick="deleteOrder('${o._id}')">🗑 Delete</button></td>
+        `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function updateStatus(id, status) {
+        const res = await fetch(`/api/order/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status }),
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.message);
+        alert("✅ Status updated!");
+        fetchOrders();
+      }
+
+      async function deleteOrder(id) {
+        if (!confirm("Delete this order?")) return;
+        const res = await fetch(`/api/order/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.message);
+        alert("🗑 Deleted!");
+        fetchOrders();
+      }
+
+      fetchOrders();
+    </script>
+  </body>
+</html>
