@@ -15,7 +15,7 @@ app.use("/user", userRoute);
 app.use("/api/products", productRoutes);
 app.use("/api/order", orderRoutes);
 app.get("/", (req, res) => {
-  res.send("ShopSmart Inventory System API is running 🚀");
+  res.send("ShopSmart Inventory System API is running ");
 });
 
 app.use(express.static(path.join(__dirname, "Html")));
@@ -25,19 +25,19 @@ app.get("/signup", (req, res) => {
 });
 app.get("/login", (req, res) => {
   console.log("hii");
-  res.sendFile(path.resolve(__dirname, "/Html/login.html"));
+  res.sendFile(path.join(__dirname, "/Html/login.html"));
 });
 app.get("/home", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "/Html/Home.html"));
+  res.sendFile(path.join(__dirname, "/Html/Home.html"));
 });
 app.get("/admin-panel", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "/Html/index.html"));
+  res.sendFile(path.join(__dirname, "/Html/index.html"));
 });
 app.get("/products", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "/Html/products.html"));
+  res.sendFile(path.join(__dirname, "/Html/products.html"));
 });
 app.get("/orders", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "/Html/orders.html"));
+  res.sendFile(path.join(__dirname, "/Html/orders.html"));
 });
 
 app.use(globalErrorHandler);
