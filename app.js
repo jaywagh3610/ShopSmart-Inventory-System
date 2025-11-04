@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 app.use(express.static(path.join(__dirname, "Html")));
 
 app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "Html", "login.html"));
+  res.sendFile(path.join(__dirname, "Html", "Login.html"));
 });
 
 app.get("/signup", (req, res) => {
@@ -29,7 +29,7 @@ app.get("/signup", (req, res) => {
 });
 
 app.get("/home", (req, res) => {
-  res.sendFile(path.join(__dirname, "Html", "home.html"));
+  res.sendFile(path.join(__dirname, "Html", "Home.html"));
 });
 app.get("/admin-panel", (req, res) => {
   res.sendFile(path.join(__dirname, "Html", "index.html"));
